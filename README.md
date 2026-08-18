@@ -103,6 +103,20 @@ Arayüz `/api/*` isteklerini Next.js üzerinden motora yönlendirir
 (`web/next.config.ts`), böylece tarayıcı tek origin görür ve CORS ayarı
 gerekmez. Motorun adresi `MOTOR_ADRESI` ortam değişkeniyle değiştirilebilir.
 
+### Giriş
+
+Arayüz bir giriş ekranının arkasındadır. Şimdilik sabit kimlik bilgileri
+kullanılır: **admin / admin** (`web/lib/oturum.ts`).
+
+Oturum `sessionStorage`'da tutulur; sekme kapanınca düşer. Böylece vardiya
+değişiminde makine başında açık kalmış bir oturum devralınmaz. Başlıktaki
+çıkış düğmesi oturumu hemen kapatır.
+
+> **Bu bir güvenlik katmanı DEĞİLDİR, arayüz kilididir.** Kimlik doğrulama
+> tamamen tarayıcıda yapılır; Excel motoru (`:8000`) hâlâ kimlik sormadan
+> yanıt verir ve doğrudan çağrılabilir. Uygulama ağa açık bir makinede
+> çalışacaksa doğrulamanın motora taşınması gerekir.
+
 ### Neden iki parça?
 
 Excel motoru şablonları ZIP/XML seviyesinde işler — metin kutuları, yazıcı
@@ -328,9 +342,23 @@ hiçbir koşulda sessizce bozuk dosya üretmez.
 python -m pytest tests/ -q
 ```
 
-152 test; şablon sadakati, EMU ölçüleri, z-sırası, onay kutusu eşleştirmesi,
-Türkçe karakter korunumu, kural motoru, CSV içe aktarma ve API uçları
-kapsanır. Testler ek bağımlılık gerektirmez.
+154 test; şablon sadakati, EMU ölçüleri, z-sırası, onay kutusu eşleştirmesi,
+Türkçe karakter korunumu, kural motoru, CSV içe aktarma, görsel boyut
+koruması ve API uçları kapsanır. Testler ek bağımlılık gerektirmez.
+
+```bash
+cd web && npx playwright test
+```
+
+33 arayüz testi; dört fonksiyonun form doldurma → xlsx indirme akışı, dosya
+adı kuralları, proje kaydet/yükle turu, klavye kısayolları, erişilebilirlik
+davranışları ve giriş ekranı kapsanır.
+
+Playwright **iki sunucuyu birden** ayağa kaldırır (uvicorn + Next.js), yani
+üretim akışları gerçek motora karşı koşar. Yalnızca Next.js başlatmak, xlsx
+üreten akışları sessizce test dışı bırakır. Next 16 aynı dizinden ikinci bir
+dev sunucusuna izin vermediği için, testlerden önce çalışan `next dev`
+varsa durdurulmalıdır.
 
 CI: her push/PR'da GitHub Actions `pytest` + `npm run lint` + `npm run build`
 + `npm run test:e2e` (Playwright) çalıştırır (`.github/workflows/ci.yml`).
