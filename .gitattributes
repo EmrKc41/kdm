@@ -1,0 +1,20 @@
+# Metin dosyalarında satır sonu deposunda LF olarak saklanır, çalışma
+# kopyasında platformun kuralına çevrilir.
+* text=auto eol=lf
+
+# Excel şablonları İKİLİDİR ve asla dönüştürülmemelidir. Git bunlara metin
+# muamelesi yaparsa satır sonu çevirisi ZIP arşivini bozar ve şablon
+# sadakat denetimi düşer — bu projede şablonlar salt okunur kabul edilir.
+*.xlsx binary
+*.xlsm binary
+*.bin  binary
+
+# Görseller ve yazı tipleri
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+
+# Windows toplu iş dosyaları CRLF ister
+*.bat text eol=crlf
+*.cmd text eol=crlf

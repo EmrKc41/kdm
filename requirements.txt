@@ -1,0 +1,20 @@
+# Kalite Doküman Üretici — çalışma zamanı bağımlılıkları
+#
+# Fabrika makinesinde internet olmayabilir. Bağımlılıkları internet erişimi
+# olan bir makinede indirip taşımak için:
+#
+#   pip download -r requirements.txt -d paketler
+#   (klasörü kopyalayın)
+#   pip install --no-index --find-links=paketler -r requirements.txt
+
+openpyxl>=3.1
+Pillow>=10.0
+fastapi>=0.110
+uvicorn>=0.27
+
+# Test için (isteğe bağlı):
+#   pytest>=8.0
+#
+# NOT: Testler bilerek httpx/jinja2/python-multipart GEREKTİRMEZ.
+# Arayüz görselleri JSON içinde base64 taşır ve testler kendi minimal
+# ASGI istemcisini kullanır (tests/asgi_istemci.py).

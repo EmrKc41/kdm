@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+uygulama.log
+ornekler/
+ayarlar/
+build/
+dist/
+*.spec
+
+# Next.js
+web/node_modules/
+web/.next/
+web/out/
+web/.turbo/
+
+# Test çıktıları
+.pytest_cache/
+web/test-results/
+web/playwright-report/
+web/blob-report/

@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================================
+   Tasarım sistemi — ui-ux-pro-max
+   Stil   : Data-Dense Dashboard (yoğun veri girişi, minimal boşluk)
+   Palet  : Blue data + amber highlights
+   Font   : Fira Sans (gövde) / Fira Code (veri, kod, sayı)
+   Kaynak : design-system/kalite-dokuman-uretici/MASTER.md
+   ==========================================================================*/
+
+:root {
+  --radius: 0.375rem;
+
+  --background: #f8fafc;
+  --foreground: #1e3a8a;
+
+  --card: #ffffff;
+  --card-foreground: #1e3a8a;
+  --popover: #ffffff;
+  --popover-foreground: #1e3a8a;
+
+  --primary: #1e40af;
+  --primary-foreground: #ffffff;
+
+  --secondary: #e9eef6;
+  --secondary-foreground: #1e40af;
+
+  --muted: #e9eef6;
+  --muted-foreground: #475569;
+
+  --accent: #d97706;
+  --accent-foreground: #ffffff;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #dbeafe;
+  --input: #e2e8f0;
+  --ring: #1e40af;
+
+  /* Tasarım sistemi spacing (MASTER.md) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Tasarım sistemi gölgeler — düz yüzeyler tercih edilir; kartlarda hafif */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Doküman alanlarının gerçek Excel renkleri — önizlemeler birebir eşleşsin */
+  --excel-sari: #ffff00;
+  --excel-sari-kenar: #d4bd00;
+  --excel-kirmizi: #ff0000;
+  --excel-yesil: #00b050;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1e3a8a;
+  --sidebar-primary: #1e40af;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e9eef6;
+  --sidebar-accent-foreground: #1e40af;
+  --sidebar-border: #dbeafe;
+  --sidebar-ring: #1e40af;
+}
+
+/* Karanlık mod: ters çevirme DEĞİL — doygunluğu düşürülmüş tonal varyantlar.
+   Kontrast oranları ayrıca doğrulanmıştır (ui-ux-pro-max: color-dark-mode). */
+.dark {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+
+  --card: #131c2e;
+  --card-foreground: #e2e8f0;
+  --popover: #131c2e;
+  --popover-foreground: #e2e8f0;
+
+  --primary: #60a5fa;
+  --primary-foreground: #0b1220;
+
+  --secondary: #1c2942;
+  --secondary-foreground: #e2e8f0;
+
+  --muted: #1c2942;
+  --muted-foreground: #94a3b8;
+
+  --accent: #f59e0b;
+  --accent-foreground: #1a1205;
+
+  --destructive: #f87171;
+  --destructive-foreground: #1a0505;
+
+  --border: #243352;
+  --input: #334155;
+  --ring: #60a5fa;
+
+  --sidebar: #131c2e;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #60a5fa;
+  --sidebar-primary-foreground: #0b1220;
+  --sidebar-accent: #1c2942;
+  --sidebar-accent-foreground: #e2e8f0;
+  --sidebar-border: #243352;
+  --sidebar-ring: #60a5fa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-excel-sari: var(--excel-sari);
+  --color-excel-sari-kenar: var(--excel-sari-kenar);
+  --color-excel-kirmizi: var(--excel-kirmizi);
+  --color-excel-yesil: var(--excel-yesil);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-fira-sans);
+  --font-mono: var(--font-fira-code);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-fira-sans), "Segoe UI", system-ui, sans-serif;
+    /* Veri sütunlarında hizalama kaymasın (ui-ux-pro-max: number-tabular) */
+    font-variant-numeric: tabular-nums;
+  }
+  /* Tıklanabilir her öge imleç değiştirir (ui-ux-pro-max: cursor-pointer) */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    cursor: pointer;
+  }
+  /* Klavye kullanıcısı odağı her zaman görsün (focus-states) */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* Dokunmatik girdide hedefleri buyut.
+   Bu urun masaustu-oncelikli, yogun bir veri giris ekrani (Data-Dense
+   Dashboard); fare ile kullanilirken 24-36px hedefler dogru ve kompakttir.
+   Ancak sahada tablet ile kullanilabilecegi icin KABA isaretleyicide
+   (parmak) hedefler 44px'e cikarilir — ui-ux-pro-max: touch-target-size,
+   "extend hit area beyond visual bounds if needed". */
+@media (pointer: coarse) {
+  button,
+  [role="tab"],
+  a[href],
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+  /* Yalnizca ikon tasiyan butonlar kare kalsin */
+  button:has(> svg:only-child) {
+    min-width: 44px;
+  }
+  /* Tablo icindeki satir ici girdiler de rahat dokunulur olsun */
+  td > input {
+    min-height: 44px;
+  }
+}
+
+/* Hareket azaltma tercihi mutlak surette dinlenir (reduced-motion) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Yoğun veri girişi için ince kaydırma çubuğu */
+@layer utilities {
+  .kaydirma-ince::-webkit-scrollbar { width: 10px; height: 10px; }
+  .kaydirma-ince::-webkit-scrollbar-track { background: transparent; }
+  .kaydirma-ince::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .kaydirma-ince::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); background-clip: content-box; }
+}
