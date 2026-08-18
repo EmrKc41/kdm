@@ -27,6 +27,7 @@ from fastapi.staticfiles import StaticFiles
 KOK = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(KOK))
 
+from ui import guvenlik                                              # noqa: E402
 from core import importers, isg_ikonlari, naming                     # noqa: E402
 from core.tarih import hafta_adi                                     # noqa: E402
 from core.errors import UygulamaHatasi                               # noqa: E402
@@ -131,6 +132,77 @@ def _kitap_bayt(wb) -> bytes:
 
 
 # --- Sayfa -------------------------------------------------------------------
+
+
+# --- Oturum ------------------------------------------------------------------
+
+#: Oturum gerektirmeyen uçlar.
+#:
+#: `/api/health` bilerek açıktır: arayüz motorun ayakta olup olmadığını
+#: GİRİŞ EKRANINDA da göstermek zorundadır; kapalıysa kullanıcı boşuna
+#: parola dener. Yanıtı yalnızca sürüm ve şablonların var olup olmadığıdır,
+#: hiçbir belge verisi taşımaz.
+ACIK_YOLLAR = frozenset(
+    {"/api/health", "/api/oturum/giris", "/api/oturum/cikis", "/api/oturum/durum"}
+)
+
+
+@app.middleware("http")
+async def oturum_denetimi(istek: Request, sonraki):
+    yol = istek.url.path
+    if not yol.startswith("/api/") or yol in ACIK_YOLLAR:
+        return await sonraki(istek)
+
+    if guvenlik.gecerli_mi(istek.cookies.get(guvenlik.CEREZ)):
+        return await sonraki(istek)
+
+    log.warning("Oturumsuz istek reddedildi: %s %s", istek.method, yol)
+    return JSONResponse(
+        status_code=401,
+        content={"hata": "Oturum süresi doldu veya giriş yapılmadı. Tekrar giriş yapın."},
+    )
+
+
+@app.post("/api/oturum/giris")
+async def api_giris(govde: dict) -> JSONResponse:
+    kullanici = str(govde.get("kullanici", ""))
+    parola = str(govde.get("parola", ""))
+
+    if not guvenlik.dogrula(kullanici, parola):
+        log.warning("Başarısız giriş denemesi: %r", kullanici[:40])
+        # Hangi alanın yanlış olduğu SÖYLENMEZ; doğru kullanıcı adını
+        # doğrulamak deneme yanılmayı kolaylaştırır.
+        return JSONResponse(
+            status_code=401, content={"hata": "Kullanıcı adı veya parola hatalı."}
+        )
+
+    yanit = JSONResponse({"durum": "acik"})
+    yanit.set_cookie(
+        guvenlik.CEREZ,
+        guvenlik.jeton_uret(),
+        max_age=guvenlik.OMUR_SN,
+        httponly=True,   # sayfadaki JavaScript okuyamaz
+        samesite="lax",
+        path="/",
+        # secure=True BİLEREK yok: uygulama fabrika makinesinde http üzerinden
+        # çalışır ve Secure çerez http'de hiç gönderilmez, giriş imkânsız olur.
+    )
+    log.info("Oturum açıldı")
+    return yanit
+
+
+@app.post("/api/oturum/cikis")
+async def api_cikis(istek: Request) -> JSONResponse:
+    guvenlik.sonlandir(istek.cookies.get(guvenlik.CEREZ))
+    yanit = JSONResponse({"durum": "kapali"})
+    yanit.delete_cookie(guvenlik.CEREZ, path="/")
+    return yanit
+
+
+@app.get("/api/oturum/durum")
+async def api_oturum_durumu(istek: Request) -> JSONResponse:
+    acik = guvenlik.gecerli_mi(istek.cookies.get(guvenlik.CEREZ))
+    return JSONResponse({"acik": acik})
 
 
 @app.get("/")

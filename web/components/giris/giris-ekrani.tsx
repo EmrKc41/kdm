@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { AlertCircle, LogIn } from "lucide-react";
-import { girisYap } from "@/lib/oturum";
+import { OturumHatasi, girisYap } from "@/lib/oturum";
 import { Alan } from "@/components/ortak/alan";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,18 +43,24 @@ export function GirisEkrani() {
     },
   };
 
-  function gonder(e: React.FormEvent) {
+  async function gonder(e: React.FormEvent) {
     e.preventDefault();
     setDeneniyor(true);
-    if (girisYap(kullanici, parola)) {
+    setHata(null);
+    try {
+      await girisYap(kullanici, parola);
       // Başarıda kapı bileşeni yeniden render eder; burada durum sıfırlanmaz.
       return;
+    } catch (hata) {
+      // Mesaj motordan gelir; hangi alanın yanlış olduğunu bilerek söylemez.
+      setHata(
+        hata instanceof OturumHatasi ? hata.mesaj : "Giriş yapılamadı.",
+      );
+      setParola("");
+      kullaniciRef.current?.focus();
+    } finally {
+      setDeneniyor(false);
     }
-    setDeneniyor(false);
-    setParola("");
-    // Hangi alanın yanlış olduğu SÖYLENMEZ: doğru kullanıcı adını doğrulamak,
-    // deneme yanılmayı kolaylaştırır.
-    setHata("Kullanıcı adı veya parola hatalı.");
   }
 
   return (
@@ -83,7 +89,7 @@ export function GirisEkrani() {
 
         <motion.form
           variants={oge}
-          onSubmit={gonder}
+          onSubmit={(e) => void gonder(e)}
           className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm"
         >
           <motion.div variants={oge}>

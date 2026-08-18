@@ -105,17 +105,45 @@ gerekmez. Motorun adresi `MOTOR_ADRESI` ortam değişkeniyle değiştirilebilir.
 
 ### Giriş
 
-Arayüz bir giriş ekranının arkasındadır. Şimdilik sabit kimlik bilgileri
-kullanılır: **admin / admin** (`web/lib/oturum.ts`).
+Uygulama bir giriş ekranının arkasındadır. Varsayılan kimlik bilgileri
+**admin / admin**'dir.
 
-Oturum `sessionStorage`'da tutulur; sekme kapanınca düşer. Böylece vardiya
-değişiminde makine başında açık kalmış bir oturum devralınmaz. Başlıktaki
-çıkış düğmesi oturumu hemen kapatır.
+Doğrulama **motorda** yapılır (`ui/guvenlik.py`): `/api/*` uçlarının tamamı
+geçerli bir oturum çerezi ister, aksi halde **401** döner. Arayüzü atlayıp
+`:8000` adresine doğrudan istek göndermek de reddedilir.
 
-> **Bu bir güvenlik katmanı DEĞİLDİR, arayüz kilididir.** Kimlik doğrulama
-> tamamen tarayıcıda yapılır; Excel motoru (`:8000`) hâlâ kimlik sormadan
-> yanıt verir ve doğrudan çağrılabilir. Uygulama ağa açık bir makinede
-> çalışacaksa doğrulamanın motora taşınması gerekir.
+```
+POST /api/oturum/giris    {kullanici, parola}  → oturum çerezi kurar
+POST /api/oturum/cikis                          → oturumu sonlandırır
+GET  /api/oturum/durum                          → {acik: true|false}
+```
+
+Kimlik bilgileri ortam değişkenleriyle değiştirilir:
+
+```bash
+set KDU_KULLANICI=kalite
+set KDU_PAROLA=uzun-bir-parola
+python calistir.py
+```
+
+**Tasarım notları:**
+
+* Jeton **HttpOnly** çerezde taşınır; sayfadaki JavaScript okuyamaz. Başlık
+  (`Authorization`) kullanılmadı çünkü İSG ikonları `<img src="/api/...">`
+  ile yükleniyor ve tarayıcı `<img>` isteklerine başlık eklemez — çerez ise
+  kendiliğinden gider ve tek mekanizma her iki durumu da kapsar.
+* `Secure` bayrağı **bilerek yok**: uygulama fabrika makinesinde `http`
+  üzerinden çalışır ve `Secure` çerez `http`'de hiç gönderilmez.
+* `/api/health` oturumsuz erişilebilir; giriş ekranı motorun ayakta olup
+  olmadığını göstermek zorundadır. Yanıtı yalnızca sürüm ve şablonların
+  var olup olmadığıdır, hiçbir belge verisi taşımaz.
+* Oturumlar **bellekte** tutulur ve 12 saat (bir vardiya) yaşar. Motor
+  yeniden başlarsa oturumlar düşer; kalıcı depo bilerek eklenmemiştir.
+
+> **Sınır:** Tek bir paylaşılan hesap vardır ve parola düz metin olarak
+> karşılaştırılır (`hmac.compare_digest` ile, zamanlama sızıntısına karşı).
+> Bu, tek makinede çalışan bir fabrika aracı için yeterlidir; birden çok
+> kullanıcı, parola özeti ve rol ayrımı gerekirse ayrıca kurulmalıdır.
 
 ### Neden iki parça?
 
@@ -342,9 +370,9 @@ hiçbir koşulda sessizce bozuk dosya üretmez.
 python -m pytest tests/ -q
 ```
 
-154 test; şablon sadakati, EMU ölçüleri, z-sırası, onay kutusu eşleştirmesi,
+164 test; şablon sadakati, EMU ölçüleri, z-sırası, onay kutusu eşleştirmesi,
 Türkçe karakter korunumu, kural motoru, CSV içe aktarma, görsel boyut
-koruması ve API uçları kapsanır. Testler ek bağımlılık gerektirmez.
+koruması, oturum doğrulaması ve API uçları kapsanır. Testler ek bağımlılık gerektirmez.
 
 ```bash
 cd web && npx playwright test

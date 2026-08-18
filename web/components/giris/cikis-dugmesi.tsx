@@ -9,7 +9,7 @@ export function CikisDugmesi() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" onClick={cikisYap} aria-label="Oturumu kapat">
+        <Button variant="ghost" size="icon" onClick={() => void cikisYap()} aria-label="Oturumu kapat">
           <LogOut className="size-4" aria-hidden />
         </Button>
       </TooltipTrigger>

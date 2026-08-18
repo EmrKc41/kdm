@@ -6,20 +6,26 @@ import {
   test as temelTest,
 } from "@playwright/test";
 
-/** Oturum anahtarı — lib/oturum.ts ile aynı olmalı. */
-export const OTURUM_ANAHTARI = "kdu-oturum";
+/** Motorun kurduğu oturum çerezinin adı (ui/guvenlik.py ile aynı). */
+export const OTURUM_CEREZI = "kdu_oturum";
 
-/* Uygulama bir giriş kapısının arkasında. Akış testlerinin ilgilendiği şey
-   giriş değil, formların davranışı; bu yüzden oturum sayfa yüklenmeden önce
-   açılmış sayılır. Giriş ekranının kendisi giris.spec.ts'te sınanır.
+/* Uygulama bir giriş kapısının arkasında. Akış testlerinin konusu giriş
+   değil, formların davranışı; bu yüzden oturum sayfa açılmadan önce gerçek
+   uç çağrılarak alınır.
 
-   addInitScript kullanılır çünkü storageState yalnızca localStorage taşır;
-   oturum bilinçli olarak sessionStorage'da tutuluyor (sekme kapanınca düşsün). */
+   Arayüzden form doldurmak yerine API çağrılıyor: giriş ekranının kendisi
+   giris.spec.ts'te sınanıyor, burada tekrarı her testi yavaşlatır ve giriş
+   ekranındaki bir aksaklık ilgisiz otuz testi birden düşürürdü.
+
+   `page.request` tarayıcı bağlamının çerez kavanozunu paylaşır, dolayısıyla
+   motorun kurduğu HttpOnly çerez sonraki sayfa isteklerine kendiliğinden
+   eklenir. */
 export const test = temelTest.extend({
   page: async ({ page }, kullan) => {
-    await page.addInitScript((anahtar) => {
-      sessionStorage.setItem(anahtar, "acik");
-    }, OTURUM_ANAHTARI);
+    const yanit = await page.request.post("/api/oturum/giris", {
+      data: { kullanici: "admin", parola: "admin" },
+    });
+    expect(yanit.ok(), "test oturumu açılamadı").toBeTruthy();
     await kullan(page);
   },
 });

@@ -20,6 +20,19 @@ from ui.app import app                          # noqa: E402
 
 istemci = AsgiIstemci(app)
 
+
+@pytest.fixture(autouse=True)
+def _oturum():
+    """Aşağıdaki testler giriş yapmış bir arayüzü taklit eder.
+
+    Motor artık /api/* için oturum çerezi ister; oturumsuz davranış ayrıca
+    test_oturum.py'de sınanır. Burada her testin başında çerezin durduğundan
+    emin oluruz, böylece testlerin sırası birbirini etkilemez.
+    """
+    if not istemci.cerezler:
+        assert istemci.giris().status_code == 200
+    yield
+
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 

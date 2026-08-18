@@ -84,6 +84,11 @@ netstat -ano | grep ":8000" | grep LISTENING
 Aynı doğrulamayı süreç içinde de yap (ilgili fonksiyonu doğrudan çağır);
 iki yöntem aynı sonucu vermiyorsa sunucuya değil, koda güven.
 
+Üçüncü yüz: proje bir **OneDrive klasöründe** duruyor ve WatchFiles orada
+değişiklikleri bazen hiç görmez — "Reloading..." satırı log'a hiç düşmez ve
+yeni uç `404` döner. Yeni bir uç ya da modül eklediysen `--reload`'a güvenme,
+motoru elle yeniden başlat.
+
 ## 5. SSR'de rastgele kimlik üretme
 
 `crypto.randomUUID()` sunucu ve istemcide farklı değer üretir → React
@@ -120,7 +125,24 @@ akışları gerçek motora karşı koşar. Yalnızca Next.js başlatmak, xlsx ü
 akışları sessizce test dışı bırakır. Next 16 aynı dizinden ikinci bir dev
 sunucusuna izin vermez — başka bir `next dev` çalışıyorsa önce onu durdur.
 
-## 9. Arayüz kuralları
+## 9. Oturum doğrulaması
+
+`/api/*` uçlarının tamamı geçerli bir oturum çerezi ister (`ui/guvenlik.py`,
+`ui/app.py` içindeki `oturum_denetimi` ara katmanı). Yeni bir uç eklerken
+hiçbir şey yapmana gerek yok — koruma varsayılan, muafiyet istisnadır.
+
+Bir ucu `ACIK_YOLLAR` listesine eklemek, onu internete açmakla aynı şeydir;
+yalnızca giriş yapılmadan da gerekiyorsa ve hiçbir belge verisi taşımıyorsa
+haklıdır. Şu an yalnızca `/api/health` ve oturum uçları açıktır.
+
+Doğrulama katmanı `ui/` altındadır, `core/` altında DEĞİL: çekirdek şablon
+doldurmaktan sorumludur ve kimlik kavramını hiç bilmez. Bu ayrım korunmalı.
+
+Testler: `tests/test_oturum.py` oturumsuz isteğin gerçekten reddedildiğini
+doğrular. `tests/asgi_istemci.py`'nin çerez kavanozu vardır; `istemci.giris()`
+çağrısı olmadan her istek 401 döner.
+
+## 10. Arayüz kuralları
 
 Yığın **Next.js + TypeScript + Tailwind + shadcn/ui**; Python HTML sunmaz,
 yalnızca JSON ve xlsx döndürür. Tasarım kararları tahminle seçilmez:
@@ -139,7 +161,7 @@ Erişilebilirlik, bu projede test edilen bir gereksinim:
 - Hareket eklerken `useReducedMotion()` kontrol et ve bir görünümde
   1-2 öğeden fazlasını canlandırma.
 
-## 10. Kod dili
+## 11. Kod dili
 
 Tanımlayıcılar ve yorumlar Türkçedir (`hazirlayan`, `dosyaAdi`, `uretiliyor`).
 Yeni kod çevredeki dile uyar. Yorumlar "ne" değil "neden" anlatır — bu

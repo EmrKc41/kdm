@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { OTURUM_ANAHTARI } from "./yardimcilar";
+import { OTURUM_CEREZI } from "./yardimcilar";
 
 /* Bu dosya BİLEREK temel `test`i kullanır: diğer spec'lerdeki oturum
    fixture'ı sayfayı açık oturumla yükler ve giriş ekranını hiç göstermez. */
@@ -55,21 +55,25 @@ test.describe("Giriş ekranı", () => {
 
     await page.getByRole("button", { name: "Oturumu kapat" }).click();
     await expect(page.getByRole("button", { name: "Giriş Yap" })).toBeVisible();
-    await expect(
-      page.evaluate((a) => sessionStorage.getItem(a), OTURUM_ANAHTARI),
-    ).resolves.toBeNull();
+
+    // Motor çerezi de gerçekten silmeli; yalnızca arayüzün kilitlenmesi yetmez.
+    const cerezler = await page.context().cookies();
+    expect(cerezler.find((c) => c.name === OTURUM_CEREZI)).toBeUndefined();
   });
 
-  test("oturum sekme oturumuyla sınırlıdır, kalıcı depoya yazılmaz", async ({ page }) => {
+  test("jeton sayfadaki JavaScript'e açılmaz", async ({ page }) => {
     await page.goto("/");
     await page.getByLabel("Kullanıcı Adı").fill("admin");
     await page.getByLabel("Parola").fill("admin");
     await page.getByRole("button", { name: "Giriş Yap" }).click();
     await expect(page.getByRole("tab", { name: "İş Talimatı" })).toBeVisible();
 
-    // localStorage'a yazılsaydı oturum tarayıcı kapansa da açık kalırdı.
-    await expect(
-      page.evaluate((a) => localStorage.getItem(a), OTURUM_ANAHTARI),
-    ).resolves.toBeNull();
+    // Çerez HttpOnly: document.cookie jetonu göstermemeli. XSS durumunda
+    // saldırganın oturumu çalmasını zorlaştıran şey budur.
+    const gorunen = await page.evaluate(() => document.cookie);
+    expect(gorunen).not.toContain(OTURUM_CEREZI);
+
+    const cerez = (await page.context().cookies()).find((c) => c.name === OTURUM_CEREZI);
+    expect(cerez?.httpOnly).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
 import type { IsgIkon } from "./types";
+import { oturumDustu } from "./oturum";
 
 /** Motorun döndürdüğü anlaşılır Türkçe hata. Teknik iz ASLA taşınmaz. */
 export class MotorHatasi extends Error {
@@ -13,6 +14,11 @@ export class MotorHatasi extends Error {
 }
 
 async function hataCoz(yanit: Response): Promise<never> {
+  /* Oturum düştüyse arayüz giriş ekranına döner. Aksi halde kullanıcı, asıl
+     sorun oturum zaman aşımıyken "dosya üretilemedi" gibi yanıltıcı bir
+     mesajla baş başa kalır ve ne yapacağını bilemez. */
+  if (yanit.status === 401) oturumDustu();
+
   let mesaj = "Dosya üretilemedi.";
   let detay: string | undefined;
   try {
