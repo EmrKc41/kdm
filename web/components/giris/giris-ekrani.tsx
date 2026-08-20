@@ -143,7 +143,7 @@ export function GirisEkrani() {
           variants={oge}
           className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground"
         >
-          Bu giriş yalnızca arayüzü kilitler; belge motorunu korumaz.
+          Oturum belge motorunda doğrulanır; kimliksiz istekler reddedilir.
         </motion.p>
       </motion.div>
     </div>

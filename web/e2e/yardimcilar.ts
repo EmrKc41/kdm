@@ -49,7 +49,12 @@ export function adKalibi(dokuman: string): RegExp {
 /** İSG ve TNE kutuları sr-only'dir; tıklama komşu ikona takılır. Kullanıcı
     zaten etiketin kendisine bastığı için etiketi tıklamak doğru davranıştır. */
 export async function kutuSec(kapsam: Locator, deger: string): Promise<Locator> {
-  const kutu = kapsam.getByRole("checkbox", { name: deger });
+  /* Kutu DEĞERE göre bulunur, erişilebilir ada göre değil: ikonlarda değer
+     ile etiket ayrışır ("gozluk" -> "Koruyucu Gözlük") ve ada göre arama
+     sessizce boş döner. Tıklama zaten değerle yapılıyordu; ikisi ayrı
+     ölçütle çalıştığı sürece bu yardımcı yalnızca ikisinin çakıştığı
+     durumlarda doğru sonuç veriyordu. */
+  const kutu = kapsam.locator(`input[type="checkbox"][value="${deger}"]`);
   await kapsam.locator(`label:has(input[value="${deger}"])`).click();
   await expect(kutu).toBeChecked();
   return kutu;
