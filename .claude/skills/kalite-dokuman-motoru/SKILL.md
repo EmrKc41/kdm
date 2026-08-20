@@ -142,7 +142,33 @@ Testler: `tests/test_oturum.py` oturumsuz isteğin gerçekten reddedildiğini
 doğrular. `tests/asgi_istemci.py`'nin çerez kavanozu vardır; `istemci.giris()`
 çağrısı olmadan her istek 401 döner.
 
-## 10. Arayüz kuralları
+**`hmac.compare_digest` metinle değil BAYTLA çağrılır.** Metin verilirse
+ASCII dışı karakterde `TypeError` fırlatır; "müdür" yazan kullanıcı temiz
+bir 401 yerine 500 alır ve `KDU_PAROLA`'ya Türkçe parola konamaz. Bu hata
+bir kez yapıldı.
+
+## 10. Kaynak tüketimi sınırları
+
+Bu uygulamanın girdilerinin hepsi "küçük görünüp büyük açılabilir" cinsten:
+base64 görseller, ZIP olan xlsx dosyaları, JSON gövdeler. Yeni bir girdi
+yolu eklerken sorulacak soru "bu dosya kaç bayt" değil, **"açıldığında ne
+kadar yer kaplar"** olmalıdır.
+
+Ölçülmüş üç örnek (hepsi düzeltildi, `tests/test_guvenlik.py` korur):
+
+- 0,43 MB'lik 144 megapiksel PNG → ~430 MB bellek (`core/imaging.py`,
+  `MAKS_PIKSEL`). Denetim `Image.open`'dan sonra ama `load()`'dan ÖNCE
+  yapılır; sonra bakmak tahsisi zaten yapmış olmak demektir.
+- 455 KB'lik xlsx → 101 MB paylaşılan metin (`core/importers.py`).
+  `read_only` ve `MAKS_SATIR` bunu sınırlamaz, çünkü `sharedStrings`
+  sayfadan önce bütün olarak okunur. Denetim ZIP dizininden yapılır;
+  arşiv boyutları gerçek okuma yapmadan bilinir.
+- 100 MB'lık JSON gövde kimlik istemeyen uca (`ui/app.py`,
+  `GOVDE_SINIRI`). Sınır yolun işine göre verilir; hepsine tek bir sayı
+  koymak ya belge üretimini kırar ya da giriş ucunu açık bırakır.
+
+## 11. Arayüz kuralları
+
 
 Yığın **Next.js + TypeScript + Tailwind + shadcn/ui**; Python HTML sunmaz,
 yalnızca JSON ve xlsx döndürür. Tasarım kararları tahminle seçilmez:
@@ -161,7 +187,13 @@ Erişilebilirlik, bu projede test edilen bir gereksinim:
 - Hareket eklerken `useReducedMotion()` kontrol et ve bir görünümde
   1-2 öğeden fazlasını canlandırma.
 
-## 11. Kod dili
+CSP `web/next.config.ts` içindedir ve üretimde dardır. Geliştirmede React
+`eval()`, Next ise HMR soketi ister; bu izinler yalnızca
+`NODE_ENV=development` iken verilir. CSP'yi değiştirdiysen doğrulamayı
+ÜRETİM derlemesinde yap (`npm run build && CI=1 npx playwright test`) —
+geliştirme modu gevşek olduğu için üretimi bozan bir kuralı gizler.
+
+## 12. Kod dili
 
 Tanımlayıcılar ve yorumlar Türkçedir (`hazirlayan`, `dosyaAdi`, `uretiliyor`).
 Yeni kod çevredeki dile uyar. Yorumlar "ne" değil "neden" anlatır — bu

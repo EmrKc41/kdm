@@ -30,6 +30,22 @@ BASLIK_ESLEME = {
 #: Excel'in bilimsel gösterime çevirdiği telefonları toparlamak için.
 MAKS_SATIR = 5000
 
+#: Yüklenen dosya için üst sınır (bayt).
+MAKS_DOSYA_BOYUTU = 10 * 1024 * 1024
+
+#: xlsx açıldığında izin verilen toplam açılmış boyut (bayt).
+#:
+#: Bayt sınırı tek başına YETMEZ: xlsx bir ZIP arşividir ve yüksek
+#: sıkıştırılabilir içerik küçük görünür. Ölçüldü — 455 KB'lik bir dosya
+#: openpyxl'e verildiğinde 101 MB'lık paylaşılan metin tablosuna açılıyor
+#: ve tamamı belleğe alınıyordu; `read_only` ve `MAKS_SATIR` bunu
+#: sınırlamaz, çünkü sharedStrings sayfadan önce bütün olarak okunur.
+MAKS_ACILMIS_BOYUT = 60 * 1024 * 1024
+
+#: İzin verilen azami sıkıştırma oranı. Normal bir xlsx 5-20 kat sıkışır;
+#: 200 kat, kasıtlı olarak şişirilmiş içeriğin işaretidir.
+MAKS_SIKISTIRMA_ORANI = 200
+
 
 def _normalize(baslik: str) -> str:
     return guvenli(str(baslik or "")).replace("_", " ").strip().lower()
@@ -145,12 +161,58 @@ def exceldan_oku(veri: bytes | str | Path) -> list[VardiyaKaydi]:
     return _satirlardan_kayitlar(satirlar)
 
 
+def _boyut_dogrula(veri: bytes, dosya_adi: str) -> None:
+    if len(veri) > MAKS_DOSYA_BOYUTU:
+        mb = MAKS_DOSYA_BOYUTU // (1024 * 1024)
+        raise GirdiHatasi(
+            f"'{dosya_adi}' çok büyük ({len(veri) / 1024 / 1024:.1f} MB). "
+            f"En fazla {mb} MB kabul edilir."
+        )
+    if not veri:
+        raise GirdiHatasi(f"'{dosya_adi}' boş görünüyor.")
+
+
+def _zip_bombasi_mi(veri: bytes, dosya_adi: str) -> None:
+    """xlsx'i açmadan ÖNCE arşivin açılmış boyutunu denetler.
+
+    openpyxl'e verilen dosya, açıldığında belleğe sığmayacak kadar büyük
+    olabilir. Arşiv dizini gerçek okuma yapmadan boyutları bildirir; bu
+    yüzden denetim ucuzdur ve zararlı içerik hiç ayrıştırılmaz.
+    """
+    import zipfile
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(veri)) as z:
+            acilmis = sum(bilgi.file_size for bilgi in z.infolist())
+    except zipfile.BadZipFile as exc:
+        raise GirdiHatasi(
+            f"'{dosya_adi}' geçerli bir Excel dosyası değil."
+        ) from exc
+
+    if acilmis > MAKS_ACILMIS_BOYUT:
+        raise GirdiHatasi(
+            f"'{dosya_adi}' açıldığında {acilmis / 1024 / 1024:.0f} MB yer "
+            f"kaplıyor; bu sınırın üstünde. Dosyayı Excel'de açıp yalnızca "
+            "personel listesini içeren yeni bir dosya olarak kaydedin."
+        )
+
+    oran = acilmis / max(len(veri), 1)
+    if oran > MAKS_SIKISTIRMA_ORANI:
+        raise GirdiHatasi(
+            f"'{dosya_adi}' olağandışı biçimde sıkıştırılmış "
+            f"({oran:.0f} kat). Dosya bozuk veya kasıtlı olarak şişirilmiş "
+            "olabilir; güvenlik gereği okunmadı."
+        )
+
+
 def oku(dosya_adi: str, veri: bytes) -> list[VardiyaKaydi]:
     """Uzantıya göre doğru okuyucuyu seçer."""
+    _boyut_dogrula(veri, dosya_adi)
     uzanti = Path(dosya_adi).suffix.lower()
     if uzanti in (".csv", ".txt"):
         return csvden_oku(veri, dosya_adi)
     if uzanti in (".xlsx", ".xlsm"):
+        _zip_bombasi_mi(veri, dosya_adi)
         return exceldan_oku(veri)
     raise GirdiHatasi(
         f"'{dosya_adi}' desteklenmeyen bir dosya tipi. "

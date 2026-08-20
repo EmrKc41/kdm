@@ -13,6 +13,7 @@ TASARIM KARARLARI
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import logging
 import sys
@@ -146,6 +147,56 @@ ACIK_YOLLAR = frozenset(
     {"/api/health", "/api/oturum/giris", "/api/oturum/cikis", "/api/oturum/durum"}
 )
 
+#: Yola göre azami istek gövdesi (bayt).
+#:
+#: Sınır yokken kimlik istemeyen giriş ucuna 100 MB'lik bir gövde
+#: gönderilebiliyor ve sunucu tamamını belleğe alıyordu. Birkaç eşzamanlı
+#: istek fabrika makinesinin belleğini tüketmeye yeter.
+#:
+#: Sınırlar yolun İŞİNE göre verilir: kimlik bilgisi birkaç yüz bayttır,
+#: personel listesi birkaç MB, belge üretimi ise logo ve dokuz adım
+#: fotoğrafını base64 olarak taşıdığı için cömert bir paya ihtiyaç duyar.
+GOVDE_SINIRI: tuple[tuple[str, int], ...] = (
+    ("/api/oturum/", 4 * 1024),
+    ("/api/vardiya/ice-aktar", 16 * 1024 * 1024),
+    ("/api/ayarlar/", 256 * 1024),
+)
+VARSAYILAN_GOVDE_SINIRI = 96 * 1024 * 1024
+
+
+def _govde_siniri(yol: str) -> int:
+    for onek, sinir in GOVDE_SINIRI:
+        if yol.startswith(onek):
+            return sinir
+    return VARSAYILAN_GOVDE_SINIRI
+
+
+@app.middleware("http")
+async def govde_boyutu(istek: Request, sonraki):
+    """Content-Length'e bakarak aşırı büyük gövdeleri okumadan reddeder.
+
+    Başlık yoksa (parçalı gönderim) boyut önceden bilinemez; tarayıcılar JSON
+    gönderirken her zaman Content-Length yollar, uygulamanın tek istemcisi de
+    kendi arayüzüdür. Ters vekil arkasına konursa asıl sınır orada da
+    tanımlanmalıdır.
+    """
+    uzunluk = istek.headers.get("content-length")
+    if uzunluk and uzunluk.isdigit():
+        sinir = _govde_siniri(istek.url.path)
+        if int(uzunluk) > sinir:
+            log.warning(
+                "Aşırı büyük istek reddedildi: %s %s (%s bayt, sınır %s)",
+                istek.method, istek.url.path, uzunluk, sinir,
+            )
+            return JSONResponse(
+                status_code=413,
+                content={
+                    "hata": "Gönderilen veri çok büyük.",
+                    "detay": f"Bu uç için üst sınır {sinir // 1024} KB.",
+                },
+            )
+    return await sonraki(istek)
+
 
 @app.middleware("http")
 async def oturum_denetimi(istek: Request, sonraki):
@@ -165,10 +216,25 @@ async def oturum_denetimi(istek: Request, sonraki):
 
 @app.post("/api/oturum/giris")
 async def api_giris(govde: dict) -> JSONResponse:
+    kalan = guvenlik.kilitli_kalan_sn()
+    if kalan:
+        log.warning("Kilitli: giriş denemesi reddedildi (%s sn kaldı)", kalan)
+        return JSONResponse(
+            status_code=429,
+            content={
+                "hata": f"Çok fazla hatalı deneme. {kalan} saniye sonra tekrar deneyin."
+            },
+            headers={"Retry-After": str(kalan)},
+        )
+
     kullanici = str(govde.get("kullanici", ""))
     parola = str(govde.get("parola", ""))
 
     if not guvenlik.dogrula(kullanici, parola):
+        guvenlik.basarisiz_kaydet()
+        # Sabit gecikme: betikle saniyede yüzlerce deneme yapmayı anlamsız
+        # kılar, elle yanlış yazan kullanıcıyı rahatsız etmez.
+        await asyncio.sleep(guvenlik.GECIKME_SN)
         log.warning("Başarısız giriş denemesi: %r", kullanici[:40])
         # Hangi alanın yanlış olduğu SÖYLENMEZ; doğru kullanıcı adını
         # doğrulamak deneme yanılmayı kolaylaştırır.
@@ -176,6 +242,7 @@ async def api_giris(govde: dict) -> JSONResponse:
             status_code=401, content={"hata": "Kullanıcı adı veya parola hatalı."}
         )
 
+    guvenlik.basarili_kaydet()
     yanit = JSONResponse({"durum": "acik"})
     yanit.set_cookie(
         guvenlik.CEREZ,

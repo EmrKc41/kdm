@@ -86,3 +86,31 @@ test.describe("Motor kapalıyken", () => {
     await expect(page.getByText(/Excel motoruna ulaşılamadı/)).toBeVisible();
   });
 });
+
+test.describe("Güvenlik başlıkları", () => {
+  test("sayfa clickjacking'e ve tür tahminine karşı korunur", async ({ page }) => {
+    const yanit = await page.goto("/");
+    const basliklar = yanit!.headers();
+
+    // Uygulama oturum çerezi kullanıyor; çerçevelenebilirse giriş yapmış
+    // operatör görünmez bir katmanda kandırılabilir.
+    expect(basliklar["x-frame-options"]).toBe("DENY");
+    expect(basliklar["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(basliklar["x-content-type-options"]).toBe("nosniff");
+    expect(basliklar["referrer-policy"]).toBe("no-referrer");
+  });
+
+  test("üretim derlemesinde eval ve dış bağlantı açılmaz", async ({ page }) => {
+    const yanit = await page.goto("/");
+    const csp = yanit!.headers()["content-security-policy"] ?? "";
+
+    // Geliştirmede React eval() ister, Next HMR soketi açar; bu izinlerin
+    // üretime sızmadığını doğrulamak bu testin tek amacı.
+    if (process.env.CI) {
+      expect(csp).not.toContain("unsafe-eval");
+      expect(csp).not.toContain("ws://");
+    }
+    expect(csp).toContain("object-src 'none'");
+  });
+});
+

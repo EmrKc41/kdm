@@ -145,6 +145,42 @@ python calistir.py
 > Bu, tek makinede çalışan bir fabrika aracı için yeterlidir; birden çok
 > kullanıcı, parola özeti ve rol ayrımı gerekirse ayrıca kurulmalıdır.
 
+---
+
+## Kötüye kullanıma karşı korumalar
+
+Aşağıdaki sınırların her biri **ölçülmüş** bir açığı kapatır; sayılar
+tahmin değil, düzeltme öncesi gözlenen davranıştan gelir. Hepsi
+`tests/test_guvenlik.py` ile korunur.
+
+| Koruma | Nerede | Ölçülen açık |
+|---|---|---|
+| Giriş yavaşlatma ve kilit | `ui/guvenlik.py` | 30 yanlış parola **0,2 saniyede** deneniyordu; sınır yoktu |
+| İstek gövdesi sınırı | `ui/app.py` | Kimlik istemeyen giriş ucu **100 MB**'lık gövdeyi tamamen belleğe alıyordu |
+| Sıkıştırma bombası denetimi | `core/importers.py` | **455 KB**'lik bir xlsx, bellekte **101 MB**'a açılıp ayrıştırılıyordu |
+| Görsel piksel sınırı | `core/imaging.py` | **0,43 MB**'lik 144 megapiksel PNG kabul edilip ~430 MB ayırıyordu |
+| Güvenlik başlıkları | `web/next.config.ts` | Uygulama çerçevelenebiliyordu (clickjacking) |
+
+**Giriş yavaşlatma:** 8 ardışık hatalı denemeden sonra 30 saniye kilit,
+her hatalı denemede 0,3 saniye gecikme. Sayaç **küreseldir**, istemci
+adresine göre değil — istekler Next.js yönlendiricisi üzerinden geldiği
+için motora hepsi `127.0.0.1`'den ulaşır ve adrese göre ayırmak yanıltıcı
+bir güven verirdi. Bedeli, saldırganın gerçek kullanıcıyı da kısa süre
+kilitleyebilmesidir; bu yüzden kilit bilerek kısa tutulmuştur.
+
+**Gövde sınırları** yolun işine göre verilir: oturum uçları 4 KB, personel
+listesi içe aktarma 16 MB, belge üretimi 96 MB (logo ve dokuz adım
+fotoğrafını base64 olarak taşır).
+
+**CSRF:** Oturum çerezi `SameSite=Lax` taşır; tarayıcı başka bir sitenin
+tetiklediği POST isteğine bu çerezi eklemez. Ayrı bir CSRF jetonu bu
+nedenle gerekmez.
+
+**CSP** üretimde dardır. Geliştirmede React `eval()`, Next ise sıcak
+yeniden yükleme için WebSocket ister; bu izinler yalnızca
+`NODE_ENV=development` iken verilir ve bir e2e testi üretime sızmadıklarını
+doğrular.
+
 ### Neden iki parça?
 
 Excel motoru şablonları ZIP/XML seviyesinde işler — metin kutuları, yazıcı
@@ -370,15 +406,16 @@ hiçbir koşulda sessizce bozuk dosya üretmez.
 python -m pytest tests/ -q
 ```
 
-164 test; şablon sadakati, EMU ölçüleri, z-sırası, onay kutusu eşleştirmesi,
+176 test; şablon sadakati, EMU ölçüleri, z-sırası, onay kutusu eşleştirmesi,
 Türkçe karakter korunumu, kural motoru, CSV içe aktarma, görsel boyut
-koruması, oturum doğrulaması ve API uçları kapsanır. Testler ek bağımlılık gerektirmez.
+koruması, oturum doğrulaması, kötüye kullanım sınırları ve API
+uçları kapsanır. Testler ek bağımlılık gerektirmez.
 
 ```bash
 cd web && npx playwright test
 ```
 
-33 arayüz testi; dört fonksiyonun form doldurma → xlsx indirme akışı, dosya
+35 arayüz testi; dört fonksiyonun form doldurma → xlsx indirme akışı, dosya
 adı kuralları, proje kaydet/yükle turu, klavye kısayolları, erişilebilirlik
 davranışları ve giriş ekranı kapsanır.
 
