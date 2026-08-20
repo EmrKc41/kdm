@@ -22,7 +22,7 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "Kalite Doküman Üretici",
+  title: "Kalite Doküman Merkezi",
   description:
     "İş talimatı, tek nokta eğitimi ve vardiya listesi dokümanlarını " +
     "şablona sadık biçimde üretir.",

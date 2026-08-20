@@ -61,9 +61,9 @@ logging.basicConfig(
         logging.StreamHandler(),
     ],
 )
-log = logging.getLogger("beycelik")
+log = logging.getLogger("kdm")
 
-app = FastAPI(title="Kalite Doküman Üretici", docs_url=None, redoc_url=None)
+app = FastAPI(title="Kalite Doküman Merkezi", docs_url=None, redoc_url=None)
 
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -686,7 +686,7 @@ app.mount("/static", StaticFiles(directory=STATIK), name="static")
 def calistir(host: str = "127.0.0.1", port: int = 8000) -> None:
     import uvicorn
 
-    print(f"\n  Kalite Doküman Üretici çalışıyor:  http://{host}:{port}\n")
+    print(f"\n  Kalite Doküman Merkezi çalışıyor:  http://{host}:{port}\n")
     uvicorn.run(app, host=host, port=port, log_level="warning")
 
 

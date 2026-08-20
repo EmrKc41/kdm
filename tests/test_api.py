@@ -16,6 +16,7 @@ pytest.importorskip("fastapi")
 
 from core.ooxml.drawing import DrawingPart      # noqa: E402
 from tests.asgi_istemci import AsgiIstemci      # noqa: E402
+from tests.conftest import sablon_gerekir      # noqa: E402
 from ui.app import app                          # noqa: E402
 
 istemci = AsgiIstemci(app)
@@ -57,7 +58,7 @@ def _xlsx_mi(yanit) -> None:
 def test_anasayfa_yukleniyor():
     yanit = istemci.get("/")
     assert yanit.status_code == 200
-    assert "Kalite Doküman Üretici" in yanit.text
+    assert "Kalite Doküman Merkezi" in yanit.text
     assert "localhost:3000" in yanit.text
 
 
@@ -71,6 +72,7 @@ def test_anasayfa_uzak_kaynak_icermez():
 # --- FONKSİYON 1 -------------------------------------------------------------
 
 
+@sablon_gerekir
 def test_talimat_uretimi(gorsel_uret):
     govde = {
         "baslik": "FIREWALL İŞ TALİMATI",
@@ -103,6 +105,7 @@ def test_talimat_uretimi(gorsel_uret):
         assert f"CYCLE: {2 + n} SN" in metinler
 
 
+@sablon_gerekir
 def test_talimat_kismi_doldurma(gorsel_uret):
     govde = {
         "baslik": "Kısmi",
@@ -134,6 +137,7 @@ def test_hata_yanitinda_stack_trace_yok():
 # --- FONKSİYON 2 -------------------------------------------------------------
 
 
+@sablon_gerekir
 def test_tne_uretimi(gorsel_uret):
     govde = {
         "baslik": "KAYNAK KONTROL EĞİTİMİ",
@@ -228,11 +232,21 @@ def test_ice_aktarma_bozuk_dosya_400():
 # --- Boş şablonlar -----------------------------------------------------------
 
 
-@pytest.mark.parametrize("tip", ["talimat", "tne", "vardiya", "rapor"])
+@pytest.mark.parametrize(
+    "tip",
+    [
+        # talimat ve tne şablondan türetilir; vardiya ve rapor sıfırdan üretilir.
+        pytest.param("talimat", marks=sablon_gerekir),
+        pytest.param("tne", marks=sablon_gerekir),
+        "vardiya",
+        "rapor",
+    ],
+)
 def test_bos_sablon_indirme(tip):
     _xlsx_mi(istemci.get(f"/api/bos/{tip}"))
 
 
+@sablon_gerekir
 def test_bos_talimat_cizim_nesnelerini_tasiyor():
     cizim = _cizim(istemci.get("/api/bos/talimat").content)
     assert len(cizim.find_all_shapes()) == 10
@@ -267,6 +281,7 @@ def test_rapor_uretimi():
     _xlsx_mi(istemci.post("/api/rapor", json=govde))
 
 
+@sablon_gerekir
 def test_saglik_kontrolu():
     yanit = istemci.get("/api/health")
     assert yanit.status_code == 200

@@ -18,3 +18,10 @@ web/.turbo/
 web/test-results/
 web/playwright-report/
 web/blob-report/
+
+# Kurum şablonları depoda TUTULMAZ.
+# Bunlar bir firmanın gerçek kalite dokümanlarıdır; herkese açık bir depoda
+# yayınlanmaları uygun değildir. Kullanıcı kendi dosyalarını templates/
+# altına koyar (bkz. templates/README.md).
+templates/*.xlsx
+templates/*.xlsm

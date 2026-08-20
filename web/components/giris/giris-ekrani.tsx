@@ -81,7 +81,7 @@ export function GirisEkrani() {
             aria-hidden
             className="mb-3 size-18 rounded-xl bg-white p-1 shadow-sm ring-1 ring-border"
           />
-          <h1 className="text-lg font-bold tracking-tight">Kalite Doküman Üretici</h1>
+          <h1 className="text-lg font-bold tracking-tight">Kalite Doküman Merkezi</h1>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Şablona sadık Excel çıktısı
           </p>

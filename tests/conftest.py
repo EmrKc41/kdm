@@ -11,6 +11,17 @@ sys.path.insert(0, str(KOK))
 SABLON_TALIMAT = KOK / "templates" / "taslaktalimat.xlsx"
 SABLON_TNE = KOK / "templates" / "taslaktne.xlsx"
 
+#: Şablonlar depoda TUTULMAZ: bir firmanın gerçek kalite dokümanlarıdır.
+#: Kullanıcı kendi `templates/` klasörünü doldurur. Bu yüzden şablona
+#: bağlı testler, dosyalar yoksa düşmez — atlanır. Aksi halde depoyu
+#: klonlayan herkes kırmızı bir test takımı görürdü.
+SABLONLAR_VAR = SABLON_TALIMAT.is_file() and SABLON_TNE.is_file()
+
+sablon_gerekir = pytest.mark.skipif(
+    not SABLONLAR_VAR,
+    reason="templates/ altında şablon yok (depoda tutulmuyor)",
+)
+
 
 @pytest.fixture(scope="session")
 def sablon_talimat() -> Path:

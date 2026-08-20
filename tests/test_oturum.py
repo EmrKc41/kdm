@@ -60,8 +60,14 @@ def test_yanlis_kullanici_ayni_mesaji_verir(temiz):
 
 
 def test_giris_sonrasi_uretim_calisir(temiz):
+    """Yetki denetimi sınanıyor, şablon doldurma değil.
+
+    Bu yüzden şablon GEREKTİRMEYEN vardiya ucu kullanılır; şablonlar depoda
+    tutulmadığı için talimat ucu her klonda atlanmak zorunda kalırdı ve
+    oturum korumasının çalıştığı doğrulanmamış olurdu.
+    """
     assert temiz.giris().status_code == 200
-    yanit = temiz.post("/api/talimat", json={"baslik": "OTURUMLU TALİMAT"})
+    yanit = temiz.post("/api/vardiya", json={"tarih": "18.08.2026", "vardiyalar": []})
     assert yanit.status_code == 200
 
 

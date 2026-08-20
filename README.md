@@ -1,7 +1,8 @@
-# Kalite Doküman Üretici
+# Kalite Doküman Merkezi
 
-Beyçelik Gestamp tarzı kalite dokümanlarını formdan doldurarak, şablonlarla
-piksel düzeyinde uyumlu ve baskıya hazır `.xlsx` dosyaları olarak üretir.
+Otomotiv yan sanayi kalite dokümanlarını formdan doldurarak, kurum
+şablonlarıyla piksel düzeyinde uyumlu ve baskıya hazır `.xlsx` dosyaları
+olarak üretir.
 
 | Fonksiyon | Referans şablon | Çıktı |
 |---|---|---|
@@ -72,9 +73,24 @@ pip install --no-index --find-links=paketler -r requirements.txt
 
 ### Şablonlar
 
-`templates/` klasöründe `taslaktalimat.xlsx` ve `taslaktne.xlsx` bulunmalıdır.
+`templates/` klasörü **bu depoda boş gelir.** İçine konması gereken
+dosyalar bir kurumun gerçek kalite dokümanlarıdır ve depoda tutulmaz.
+Kendi şablonlarınızı buraya koyun:
+
+| Dosya | Kullanan fonksiyon |
+|---|---|
+| `taslaktalimat.xlsx` | İş Talimatı |
+| `taslaktne.xlsx` | Tek Nokta Eğitimi |
+
+Dosya adları küçük harfli olmalıdır. Şablonlardan tam olarak ne beklendiği
+`templates/README.md` içinde anlatılıyor.
+
 Bu dosyalar **salt okunur** kabul edilir; program hiçbir koşulda üzerlerine
 yazmaz, her zaman kopya üzerinde çalışır.
+
+Şablon yoksa uygulama yine açılır: Vardiya Listesi ve Kalite Raporu
+şablon kullanmaz, çalışmaya devam eder. Test takımında şablona bağlı
+testler düşmez, atlanır.
 
 ---
 
@@ -107,6 +123,11 @@ gerekmez. Motorun adresi `MOTOR_ADRESI` ortam değişkeniyle değiştirilebilir.
 
 Uygulama bir giriş ekranının arkasındadır. Varsayılan kimlik bilgileri
 **admin / admin**'dir.
+
+> **Kullanmaya başlamadan önce parolayı değiştirin.** Varsayılan kimlik
+> bilgileri bu deponun kaynak kodunda açıkça yazılıdır; değiştirilmediği
+> sürece hiçbir koruma sağlamazlar. Aşağıdaki ortam değişkenleriyle
+> değiştirilir.
 
 Doğrulama **motorda** yapılır (`ui/guvenlik.py`): `/api/*` uçlarının tamamı
 geçerli bir oturum çerezi ister, aksi halde **401** döner. Arayüzü atlayıp
@@ -518,7 +539,7 @@ iletin — çıktı doğrulayıcının kaçırdığı bir durum var demektir.
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --name KaliteDokumanUretici ^
+pyinstaller --onefile --name KaliteDokumanMerkezi ^
   --add-data "ui/static;ui/static" ^
   --add-data "templates;templates" ^
   --hidden-import uvicorn.logging ^
@@ -526,7 +547,7 @@ pyinstaller --onefile --name KaliteDokumanUretici ^
   ui/app.py
 ```
 
-Üretilen `dist/KaliteDokumanUretici.exe` çift tıklanarak çalıştırılır.
+Üretilen `dist/KaliteDokumanMerkezi.exe` çift tıklanarak çalıştırılır.
 
 > **Not:** Masaüstü paketi yalnızca Excel motorunu başlatır. Tam arayüz için
 > `python calistir.py --uretim` kullanın veya Next.js build'ini ayrıca

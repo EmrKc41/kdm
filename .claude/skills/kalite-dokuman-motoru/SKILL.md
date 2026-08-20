@@ -1,7 +1,7 @@
 ---
 name: kalite-dokuman-motoru
 description: >
-  Kalite Doküman Üretici projesinde (talimatdeneme) Excel şablonlarına
+  Kalite Doküman Merkezi projesinde (talimatdeneme) Excel şablonlarına
   dokunan her iş için zorunlu kurallar: openpyxl yasağı ve ZIP/XML cerrahisi,
   çizim nesnesi (metin kutusu) koruma, dolgu/kenarlık ayrımı, Türkçe büyük
   harf, uvicorn --reload zorunluluğu, SSR'de deterministik kimlik, iki
@@ -13,7 +13,7 @@ description: >
   ve kullanıcıya bozuk dosya gitmesine yol açmış gerçek hatalardan gelir.
 ---
 
-# Kalite Doküman Üretici — motor kuralları
+# Kalite Doküman Merkezi — motor kuralları
 
 Bu proje otomotiv yan sanayi için baskıya hazır `.xlsx` üretir. Çıktı
 şablonla **piksel düzeyinde** uyumlu olmak zorundadır: dosyalar fabrikada

@@ -3,7 +3,7 @@ import { expect, test } from "./yardimcilar";
 test.describe("Ana sayfa kabuk testleri", () => {
   test("başlık ve sekmeler görünür", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Kalite Doküman Üretici" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Kalite Doküman Merkezi" })).toBeVisible();
     await expect(page.getByRole("tab", { name: "İş Talimatı" })).toBeVisible();
     await expect(page.getByRole("tab", { name: "Tek Nokta Eğitimi" })).toBeVisible();
     await expect(page.getByRole("tab", { name: "Vardiya Listesi" })).toBeVisible();

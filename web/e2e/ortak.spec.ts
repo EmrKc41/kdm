@@ -40,7 +40,7 @@ test.describe("Ortak eylemler", () => {
   test("Ctrl+Enter kısayolu üretimi tetikler", async ({ page }) => {
     await sekmeAc(page, "İş Talimatı");
     await page.getByLabel("Talimat Adı").fill("KISAYOL TALİMATI");
-    await page.getByRole("heading", { name: "Kalite Doküman Üretici" }).click();
+    await page.getByRole("heading", { name: "Kalite Doküman Merkezi" }).click();
 
     const inecek = page.waitForEvent("download");
     await page.keyboard.press("Control+Enter");

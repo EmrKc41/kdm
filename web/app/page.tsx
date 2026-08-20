@@ -32,7 +32,7 @@ export default function AnaSayfa() {
                   durur. Ince bir cerceve kenarini zeminden ayirir. */}
               <Image
                 src="/marka/logo-192.png"
-                alt="Kalite Doküman Üretici"
+                alt="Kalite Doküman Merkezi"
                 width={32}
                 height={32}
                 priority
@@ -40,7 +40,7 @@ export default function AnaSayfa() {
               />
               <div className="leading-tight">
                 <h1 className="text-sm font-bold tracking-tight">
-                  Kalite Doküman Üretici
+                  Kalite Doküman Merkezi
                 </h1>
                 <p className="text-[11px] text-muted-foreground">
                   Şablona sadık Excel çıktısı

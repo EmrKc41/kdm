@@ -47,7 +47,7 @@ def kontrol(uretim: bool = False) -> None:
 
 
 def main() -> None:
-    ayrist = argparse.ArgumentParser(description="Kalite Doküman Üretici")
+    ayrist = argparse.ArgumentParser(description="Kalite Doküman Merkezi")
     ayrist.add_argument("--uretim", action="store_true", help="derlenmiş sürümü çalıştır")
     ayrist.add_argument("--tarayici", action="store_true", help="tarayıcıyı otomatik aç")
     args = ayrist.parse_args()
