@@ -1,8 +1,9 @@
 import path from "node:path";
-import { expect, sekmeAc, test } from "./yardimcilar";
+import { SABLONLAR_VAR, expect, sekmeAc, test } from "./yardimcilar";
 
 test.describe("Ortak eylemler", () => {
   test("motor durumu şablonların hazır olduğunu bildirir", async ({ page }) => {
+  test.skip(!SABLONLAR_VAR, "templates/ altında şablon yok (depoda tutulmuyor)");
     await page.goto("/");
     await expect(
       page.getByRole("status", { name: "Excel motoru çalışıyor · şablonlar hazır" }),
@@ -10,6 +11,7 @@ test.describe("Ortak eylemler", () => {
   });
 
   test("boş şablon indirilir", async ({ page }) => {
+  test.skip(!SABLONLAR_VAR, "templates/ altında şablon yok (depoda tutulmuyor)");
     await sekmeAc(page, "İş Talimatı");
     const inecek = page.waitForEvent("download");
     await page.getByRole("button", { name: "Boş Şablon" }).click();
@@ -38,6 +40,7 @@ test.describe("Ortak eylemler", () => {
   });
 
   test("Ctrl+Enter kısayolu üretimi tetikler", async ({ page }) => {
+  test.skip(!SABLONLAR_VAR, "templates/ altında şablon yok (depoda tutulmuyor)");
     await sekmeAc(page, "İş Talimatı");
     await page.getByLabel("Talimat Adı").fill("KISAYOL TALİMATI");
     await page.getByRole("heading", { name: "Kalite Doküman Merkezi" }).click();

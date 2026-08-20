@@ -1,4 +1,6 @@
-import { adKalibi, expect, kutuSec, sekmeAc, test, uret } from "./yardimcilar";
+import {
+  SABLONLAR_VAR, adKalibi, expect, kutuSec, sekmeAc, test, uret,
+} from "./yardimcilar";
 
 test.describe("Tek Nokta Eğitimi akışı", () => {
   test("eğitim içeriği ve türü seçimi sayaca yansır", async ({ page }) => {
@@ -17,6 +19,7 @@ test.describe("Tek Nokta Eğitimi akışı", () => {
   });
 
   test("TNE üretilir ve dosya adı kurala uyar", async ({ page }) => {
+  test.skip(!SABLONLAR_VAR, "templates/ altında şablon yok (depoda tutulmuyor)");
     await sekmeAc(page, "Tek Nokta Eğitimi");
     await kutuSec(page.getByRole("group", { name: "Eğitim içeriği" }), "GÜVENLİK");
     await page.getByLabel("Eğitim Süresi").fill("15 DK");

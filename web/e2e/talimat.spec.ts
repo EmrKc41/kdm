@@ -1,4 +1,6 @@
-import { adKalibi, expect, kutuSec, sekmeAc, test, uret, uretDene } from "./yardimcilar";
+import {
+  SABLONLAR_VAR, adKalibi, expect, kutuSec, sekmeAc, test, uret, uretDene,
+} from "./yardimcilar";
 
 test.describe("İş Talimatı akışı", () => {
   test("talimat adı boşken üretim engellenir", async ({ page }) => {
@@ -41,6 +43,7 @@ test.describe("İş Talimatı akışı", () => {
   });
 
   test("talimat üretilir ve dosya adı kurala uyar", async ({ page }) => {
+  test.skip(!SABLONLAR_VAR, "templates/ altında şablon yok (depoda tutulmuyor)");
     await sekmeAc(page, "İş Talimatı");
     await page.getByLabel("Talimat Adı").fill("FIREWALL İŞ TALİMATI");
     await page.getByLabel("Konu / Parça Referansı").fill("10598-AG");

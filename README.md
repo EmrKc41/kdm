@@ -90,7 +90,8 @@ yazmaz, her zaman kopya üzerinde çalışır.
 
 Şablon yoksa uygulama yine açılır: Vardiya Listesi ve Kalite Raporu
 şablon kullanmaz, çalışmaya devam eder. Test takımında şablona bağlı
-testler düşmez, atlanır.
+testler düşmez, **atlanır** — şablonsuz bir klonda `pytest` 89 geçer /
+87 atlar, Playwright 30 geçer / 5 atlar; hiçbiri kırmızı olmaz.
 
 ---
 
