@@ -237,7 +237,7 @@ kopyalanabilir; ardından `python calistir.py --uretim` ile açılır.
    otomatik olarak `İŞ TALİMATI HK.` ekler; istemezseniz kutuyu kaldırın.
    Alanın altındaki önizleme çıktıyı canlı gösterir.
 3. **Logo** yükleyin. Çıktıda tam **1,55 × 3,28 cm** (558000 × 1180800 EMU)
-   ölçüsüne getirilir; en-boy oranı korunur, artan alan beyazla doldurulur.
+   ölçüsüne getirilir; en-boy oranı korunur, taşan kenarlar kırpılır.
    F6:G7 alanındaki **SC (özel karakteristik) sembolü şablonda sabittir** ve
    hiç değiştirilmez — kullanıcıdan istenmez.
 4. **İSG ekipmanı** ikonlarını seçin. Şablonun küçük ve okunaksız
@@ -277,7 +277,7 @@ kopyalanabilir; ardından `python calistir.py --uretim` ile açılır.
   > dolgu sanır ve kutuyu doldurmak yerine **çerçevesini** boyar. Bu yüzden
   > `set_fill` yalnızca `<a:ln>` öncesindeki bölgeye dokunur; dört regresyon
   > testi kenarlıkların şablonla birebir aynı kaldığını doğrular.
-* **Eğitim görseli** B11:G42 alanına en-boy oranı korunarak sığdırılır ve
+* **Eğitim görseli** B11:G42 alanını en-boy oranı korunarak tamamen doldurur ve
   arkaya gönderilir.
 * **Katılımcılar** en fazla 32 kişidir (satır 11–42). İmza sütunu ıslak imza
   için bilinçli olarak boş bırakılır.

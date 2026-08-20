@@ -143,15 +143,20 @@ def test_olcu_kaynak_oranindan_bagimsiz(sablon_tne, gorsel_uret, boyut):
     assert g.ext == (TNE_IMAGE_WIDTH_EMU, TNE_IMAGE_HEIGHT_EMU)
 
 
-def test_gorsel_kirpilmadan_sigdiriliyor(sablon_tne, gorsel_uret):
-    """Kutu sabit ama görsel KIRPILMAZ; oranı korunur, artan alan beyaz olur."""
+def test_gorsel_kutuyu_bosluksuz_doldurur(sablon_tne, gorsel_uret):
+    """Görsel kutuyu TAMAMEN doldurur; oran korunur, taşan kısım kırpılır.
+
+    Önceki davranış sığdırmaktı ve artan alanı beyaz bırakıyordu: kare bir
+    kaynak, geniş TNE kutusunda yanlarda geniş beyaz bantlar üretiyordu.
+    Ürün kararı doldurma yönünde değişti (bkz. core/imaging.py).
+    """
     import io
 
     from PIL import Image
 
     from core.units import TNE_IMAGE_HEIGHT_EMU, TNE_IMAGE_WIDTH_EMU
 
-    # Kare kaynak, geniş kutu -> solda ve sağda beyaz bant beklenir.
+    # Kare kaynak, geniş kutu: eskiden yanlar beyaz kalıyordu.
     veri = TneVerisi(egitim_gorseli=gorsel_uret(600, 600, renk=(0, 0, 0)))
     pkg = tne.uret(veri, sablon_tne)
 
@@ -160,9 +165,11 @@ def test_gorsel_kirpilmadan_sigdiriliyor(sablon_tne, gorsel_uret):
         hedef_oran = TNE_IMAGE_WIDTH_EMU / TNE_IMAGE_HEIGHT_EMU
         assert abs(img.width / img.height - hedef_oran) < 0.01
 
-        # Sol kenar beyaz (dolgu), orta siyah (kaynak görsel)
-        assert img.getpixel((2, img.height // 2)) == (255, 255, 255)
-        assert img.getpixel((img.width // 2, img.height // 2)) != (255, 255, 255)
+        # Kenarlar da kaynak görselden gelmeli: hiçbir yerde beyaz dolgu yok.
+        for x in (2, img.width // 2, img.width - 3):
+            assert img.getpixel((x, img.height // 2)) != (255, 255, 255), (
+                f"x={x} noktasında beyaz dolgu var — kutu doldurulmamış"
+            )
 
 
 def test_logo_olcusu_sablondan_devralindi(ornek_tne, sablon_tne):

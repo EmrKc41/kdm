@@ -152,7 +152,7 @@ export function TneFormu() {
             deger={v.egitim_gorseli}
             onDegisim={(g) => yama("egitim_gorseli", g)}
             etiket="Parça Resmi"
-            ipucu="Kırpılmaz: oranı korunarak kutuya sığdırılır, artan alan beyaz kalır"
+            ipucu="Kutuyu tamamen doldurur: oranı korunur, taşan kenarlar kırpılır"
             yukseklikSinifi="h-48"
           />
         </Bolum>

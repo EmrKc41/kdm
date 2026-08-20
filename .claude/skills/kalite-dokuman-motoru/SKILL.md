@@ -102,7 +102,27 @@ satırlarda rastgele kimlik güvenlidir; o kod yalnızca istemcide çalışır.
 kopya üzerinde çalış. Şablon Excel'de açılıp kaydedilmişse çizim nesneleri
 zaten kaybolmuştur; çıktı doğrulayıcı bunu yakalar ve üretim durur.
 
-## 7. Metni sessizce kırpma
+## 7. Görsel yerleştirme: kutu DOLDURULUR, sığdırılmaz
+
+`core/imaging.hazirla` görseli hedef kutuyu tamamen kaplayacak şekilde
+ölçekler ve taşan kısmı ortadan kırpar (`object-fit: cover`). Oran hiç
+bozulmaz, kutuda beyaz boşluk kalmaz.
+
+Bu davranış 20 Ağustos 2026'da DEĞİŞTİ. Öncesinde görsel kutuya sığdırılıyor
+(`contain`), artan alan beyaz bırakılıyordu. Kutular çok geniş olduğu için
+sonuç kötüydü: 17 x 5 cm'lik adım fotoğrafı kutusunda (3,4:1) sıradan bir
+4:3 telefon fotoğrafı kutunun yalnızca %39'unu dolduruyordu.
+
+Bunun bedeli bilgi kaybıdır: aynı fotoğrafın yüksekliğinin ~%61'i kadraj
+dışında kalır. Kırpmayı yeniden tartışmaya açan biri çıkarsa, seçenek
+"sığdır" değil, **kutu oranını şablonda değiştirmek** olmalı — asıl sorun
+kutunun 3,4:1 olması.
+
+Görsel davranışını değiştirirken `tests/test_tne.py` içindeki
+`test_gorsel_kutuyu_bosluksuz_doldurur` ve arayüzdeki ipucu metinleri de
+güncellenmeli; kullanıcıya verilen vaat kodla aynı kalmalı.
+
+## 8. Metni sessizce kırpma
 
 Sarı alan sınırı `lib/types.ts` içindeki `SARI_ALAN_SINIRI` ile tanımlıdır.
 Aşıldığında program metni kırpmaz — üretimi durdurup kullanıcıdan kısaltma
@@ -110,7 +130,7 @@ ister. Fabrikada eksik okunan bir talimat, sığdırılmış bir talimattan çok
 daha pahalıdır. Sınırı değiştirirken README'yi de güncelle; ikisi bir kez
 birbirinden ayrı düştü.
 
-## 8. Testler ve doğrulama
+## 9. Testler ve doğrulama
 
 ```bash
 python -m pytest -q
@@ -125,7 +145,7 @@ akışları gerçek motora karşı koşar. Yalnızca Next.js başlatmak, xlsx ü
 akışları sessizce test dışı bırakır. Next 16 aynı dizinden ikinci bir dev
 sunucusuna izin vermez — başka bir `next dev` çalışıyorsa önce onu durdur.
 
-## 9. Oturum doğrulaması
+## 10. Oturum doğrulaması
 
 `/api/*` uçlarının tamamı geçerli bir oturum çerezi ister (`ui/guvenlik.py`,
 `ui/app.py` içindeki `oturum_denetimi` ara katmanı). Yeni bir uç eklerken
@@ -147,7 +167,7 @@ ASCII dışı karakterde `TypeError` fırlatır; "müdür" yazan kullanıcı tem
 bir 401 yerine 500 alır ve `KDU_PAROLA`'ya Türkçe parola konamaz. Bu hata
 bir kez yapıldı.
 
-## 10. Kaynak tüketimi sınırları
+## 11. Kaynak tüketimi sınırları
 
 Bu uygulamanın girdilerinin hepsi "küçük görünüp büyük açılabilir" cinsten:
 base64 görseller, ZIP olan xlsx dosyaları, JSON gövdeler. Yeni bir girdi
@@ -167,7 +187,7 @@ kadar yer kaplar"** olmalıdır.
   `GOVDE_SINIRI`). Sınır yolun işine göre verilir; hepsine tek bir sayı
   koymak ya belge üretimini kırar ya da giriş ucunu açık bırakır.
 
-## 11. Arayüz kuralları
+## 12. Arayüz kuralları
 
 
 Yığın **Next.js + TypeScript + Tailwind + shadcn/ui**; Python HTML sunmaz,
@@ -193,7 +213,7 @@ CSP `web/next.config.ts` içindedir ve üretimde dardır. Geliştirmede React
 ÜRETİM derlemesinde yap (`npm run build && CI=1 npx playwright test`) —
 geliştirme modu gevşek olduğu için üretimi bozan bir kuralı gizler.
 
-## 12. Kod dili
+## 13. Kod dili
 
 Tanımlayıcılar ve yorumlar Türkçedir (`hazirlayan`, `dosyaAdi`, `uretiliyor`).
 Yeni kod çevredeki dile uyar. Yorumlar "ne" değil "neden" anlatır — bu

@@ -1,8 +1,21 @@
-"""Görsel hazırlama: en-boy oranını koruyarak hedef kutuya sığdırma.
+"""Görsel hazırlama: en-boy oranını koruyarak hedef kutuyu DOLDURMA.
 
-Görev tanımı gereği görseller KIRPILMAZ. Hedef kutuya oranı bozulmadan
-sığdırılır ve artan alan beyaz dolgu ile doldurularak görsel ortalanır.
-Böylece çıktıdaki `<xdr:ext>` her zaman istenen tam EMU değerine eşit olur.
+Görsel, hedef kutuyu tamamen kaplayacak biçimde ölçeklenir ve taşan kısım
+ortadan kırpılır (CSS'teki `object-fit: cover` davranışı). Oran hiç bozulmaz;
+kutuda beyaz boşluk kalmaz. Çıktıdaki `<xdr:ext>` her zaman istenen tam EMU
+değerine eşittir.
+
+ÖNCEKİ DAVRANIŞ VE NEDEN DEĞİŞTİ: Görseller eskiden kutuya sığdırılıyor
+(`contain`), artan alan beyaz bırakılıyordu. Kutular çok geniş olduğu için
+sonuç kötüydü — 17 x 5 cm'lik adım fotoğrafı kutusunda (3,4:1) sıradan bir
+4:3 telefon fotoğrafı kutunun yalnızca %39'unu dolduruyor, %61'i beyaz
+kalıyordu; dikey fotoğrafta beyaz oranı %78'e çıkıyordu.
+
+BEDELİ: Kırpma bilgi kaybettirir. Aynı 4:3 fotoğrafın yüksekliğinin ~%61'i
+kadraj dışında kalır. Operatörün görmesi gereken ayrıntı kenarda kalıyorsa
+fotoğraf, kutunun oranına yakın biçimde çekilmeli ya da kırpılarak
+yüklenmelidir. Bu bilinçli bir üründe seçim; sığdırma davranışına dönmek
+`ORAN_SEC` fonksiyonunu değiştirmekle olur.
 """
 
 from __future__ import annotations
@@ -107,13 +120,22 @@ def hazirla(
 
     img = _duzlestir(img, arka_plan)
 
-    oran = min(hedef_w / img.width, hedef_h / img.height)
-    yeni_w = max(1, int(round(img.width * oran)))
-    yeni_h = max(1, int(round(img.height * oran)))
-    kucultulmus = img.resize((yeni_w, yeni_h), Image.LANCZOS)
+    # KUTUYU DOLDUR: küçük olan değil, BÜYÜK olan oran seçilir; görsel
+    # kutudan taşar ve taşan kısım ortadan kırpılır.
+    oran = max(hedef_w / img.width, hedef_h / img.height)
+    yeni_w = max(hedef_w, int(round(img.width * oran)))
+    yeni_h = max(hedef_h, int(round(img.height * oran)))
+    olceklenmis = img.resize((yeni_w, yeni_h), Image.LANCZOS)
 
-    tuval = Image.new("RGB", (hedef_w, hedef_h), arka_plan)
-    tuval.paste(kucultulmus, ((hedef_w - yeni_w) // 2, (hedef_h - yeni_h) // 2))
+    # Ortadan kırp: kadrajın merkezi korunur, kenarlar eşit oranda gider.
+    sol = (yeni_w - hedef_w) // 2
+    ust = (yeni_h - hedef_h) // 2
+    tuval = olceklenmis.crop((sol, ust, sol + hedef_w, ust + hedef_h))
+
+    # Kırpma sonrası ölçü tam olmalı; aksi halde çıktıdaki <xdr:ext> ile
+    # gömülü görselin pikselleri ayrışır ve Excel görseli esnetir.
+    if tuval.size != (hedef_w, hedef_h):
+        tuval = tuval.resize((hedef_w, hedef_h), Image.LANCZOS)
 
     cikti = io.BytesIO()
     if bicim.upper() == "JPEG":

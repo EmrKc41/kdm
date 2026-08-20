@@ -314,8 +314,8 @@ def _yerlestir_egitim_gorseli(
     """B11:G42 alanına TAM 41,75 x 23,72 cm ölçüsünde yerleştirir.
 
     Ölçü sabittir (kullanıcı talebi): görselin oranı ne olursa olsun çıktıdaki
-    kutu her zaman aynı boyuttadır. Görsel kırpılmaz; oranı korunarak bu
-    kutuya sığdırılır ve artan alan beyazla doldurularak ortalanır.
+    kutu her zaman aynı boyuttadır. Görsel bu kutuyu TAMAMEN doldurur; oranı
+    korunur ve taşan kenarlar ortadan kırpılır (bkz. core/imaging.py).
     `oneCellAnchor` kullanılır çünkü ölçü yalnızca bu anchor tipinde
     bağlayıcıdır.
     """
