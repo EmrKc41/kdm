@@ -62,7 +62,7 @@ def ornek_talimat(gorsel_uret):
         konu="10598-AG",
         parca_no="10598-AG",
         parca_adi="FIREWALL SAĞ",
-        musteri="FORD OTOSAN — GÖLCÜK",
+        musteri="ABC OTOMOTİV — MERKEZ FABRİKA",
         hazirlama_tarihi="17.08.2026",
         hazirlayan="Emirhan Koç",
         son_rev_tarihi="17.08.2026",

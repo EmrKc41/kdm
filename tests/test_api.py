@@ -79,7 +79,7 @@ def test_talimat_uretimi(gorsel_uret):
         "konu": "10598-AG",
         "konu_otomatik_ek": True,
         "parca_no": "10598-AG",
-        "musteri": "FORD OTOSAN",
+        "musteri": "ABC OTOMOTİV",
         "hazirlayan": "Emirhan Koç",
         "tarih": "17.08.2026",
         "logo": _data_url(gorsel_uret(600, 280)),

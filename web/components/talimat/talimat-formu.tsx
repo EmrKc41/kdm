@@ -211,7 +211,7 @@ export function TalimatFormu() {
           </Alan>
           <Alan etiket="Müşteri" htmlFor="t-musteri"
             ipucu="Bu işletme nereye / ne için üretiyor?" className="sm:col-span-2">
-            <Input id="t-musteri" placeholder="FORD OTOSAN"
+            <Input id="t-musteri" placeholder="ABC OTOMOTİV"
               value={v.musteri} onChange={(e) => yama("musteri", e.target.value)} />
           </Alan>
         </div>
