@@ -25,3 +25,7 @@ web/blob-report/
 # altına koyar (bkz. templates/README.md).
 templates/*.xlsx
 templates/*.xlsm
+
+# Python sanal ortami (kur.bat olusturur)
+.venv/
+venv/

@@ -97,6 +97,21 @@ testler düşmez, **atlanır** — şablonsuz bir klonda `pytest` 89 geçer /
 
 ## Çalıştırma
 
+### En kolay yol (Windows)
+
+Terminalle uğraşmak istemiyorsanız iki dosya yeter:
+
+| Dosya | Ne yapar |
+|---|---|
+| `kur.bat` | **Bir kez** çalıştırılır. Python ortamını kurar, paketleri indirir, arayüzü derler. |
+| `baslat.bat` | Her açılışta çift tıklanır. Programı başlatır ve tarayıcıyı açar. |
+
+`kur.bat` yalnızca Python 3.11+ ve Node.js 20+ ister; ikisi de yoksa nereden
+kurulacağını söyler ve durur. Paketleri projeye ait bir `.venv` klasörüne
+kurar, bilgisayarın geneline bulaştırmaz.
+
+### Terminalden
+
 Uygulama iki parçadan oluşur: **Excel motoru** (Python/FastAPI) ve **web
 arayüzü** (Next.js). İkisini birden başlatmak için:
 
